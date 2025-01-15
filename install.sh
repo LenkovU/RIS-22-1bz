@@ -1,7 +1,7 @@
 #!/bin/bash
 
 curl -O https://github.com/LenkovU/RIS-22-1bz/blob/main/motion-display-control.py
-curl -O https://github.com/LenkovU/RIS-22-1bz/blob/main//motion-display-control.service
+curl -O https://github.com/LenkovU/RIS-22-1bz/blob/main/display_control.service
 
 if [ ! -d "/usr/local/bin" ]; then
   sudo mkdir -p /usr/local/bin
