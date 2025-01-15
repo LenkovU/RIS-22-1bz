@@ -32,4 +32,4 @@ curl https://github.com/LenkovU/RIS-22-1bz/blob/main/install.sh
 curl https://github.com/LenkovU/RIS-22-1bz/blob/main/uninstall.sh
 ```
 
-Учебная версия 0.5.7 alfa <--- излишний выпендреж
+
