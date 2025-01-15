@@ -13,8 +13,13 @@
 Библиотека gpiozero
 Установка библиотеки: sudo apt install python3-gpiozero
 
-Установка скрипта: curl https://raw.githubusercontent.com/fire1ce/raspberry-pi-pir-motion-display-control/main/install.sh | bash
+Установка скрипта: 
+```bash
+curl https://raw.githubusercontent.com/fire1ce/raspberry-pi-pir-motion-display-control/main/install.sh | bash
+```
 
+```bash
 Удаление скрипта: curl https://raw.githubusercontent.com/fire1ce/raspberry-pi-pir-motion-display-control/main/uninstall.sh | bash
+```
 
 Учебная версия 0.5.7 alfa <--- излишний выпендреж
