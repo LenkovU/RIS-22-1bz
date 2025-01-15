@@ -66,6 +66,13 @@ class Motion:
             Display.turnOn()
 
         self.resetTimer()
-
+pir = MotionSensor(4)
+camera = PiCamera()
+ 
+while True:
+    pir.wait_for_motion()
+    if pir.motion_detected:
+        print("Good Looking Person Detected")
+        camera.start_preview()
 
 motion = Motion(gpio_pin=4, display_delay=60, verbose=False)
