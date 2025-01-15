@@ -17,7 +17,7 @@
 
 Библиотека: gpiozero
 
-## Установка библиотеки
+##№ Установка библиотеки
 ```bash
 sudo apt install python3-gpiozero
 ```
