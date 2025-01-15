@@ -1,0 +1,60 @@
+Подключение PIR(датчика движения) к RaspberryPi.⁠⁠
+В одном из своих постов я описывал как сделать умное зеркало. В комментариях поступило предложение подключить датчик движения. Опишу процесс подключения датчика,может быть кому-то будет полезна эта информация
+
+Контакты на датчике:
+
+Подключение PIR(датчика движения) к RaspberryPi. Зеркало, Raspberry pi, Arduino, Датчик, Датчик движения, Умный дом, Linux, Длиннопост
+В моем случае слева направо расположены контакты земли, управления и 5В. В датчиках разных производителей эти контакты могут быть расположены в другом месте или порядке.
+
+Подключение датчика к GPIO:
+GND-2 пин GPIO
+OUT-11 пин GPIO
++5V-6 пин GPIO
+
+Создание скрипта на питоне:
+
+Теперь мы делаем скрипт python.
+Создаем файл в каталоге PIR_sensor с расширением .py(я назвал PIR.py). Открываем этот файл любым текстовым редактором и прописываем туда следующие строки :
+
+#!/usr/bin/env python
+
+import sys
+import time
+import RPi.GPIO as io 
+import subprocess
+
+io.setmode(io.BOARD)
+SHUTOFF_DELAY = 600 # секунды
+PIR_PIN=11
+
+def main():
+    io.setup(PIR_PIN, io.IN)
+    turned_off = False
+    last_motion_time = time.time()
+    while True:
+        if io.input(PIR_PIN):
+            last_motion_time = time.time()
+            sys.stdout.flush()
+            if turned_off:
+                turned_off = False
+                turn_on()
+        else:
+if not turned_off and time.time() > (last_motion_time + SHUTOFF_DELAY):
+                turned_off = True
+                turn_off()
+            if not turned_off and time.time() > (last_motion_time + 1):
+        time.sleep(.1)
+def turn_on():
+    subprocess.call("sh /home/pi/PIR_sensor/monitor_on.sh", shell=True)
+
+def turn_off():
+    subprocess.call("sh /home/pi/PIR_sensor/monitor_off.sh", shell=True)
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        io.cleanup()
+Проверяем скрипт. Если датчик не улавливает движения в течение 600с(10мин), то монитор выключается. Всё работает
+Теперь сделаем так, чтобы скрипт запускался автоматическое при запуске системы.
+Сохраняем изменения, выходим и перезагружаем raspberry pi.
