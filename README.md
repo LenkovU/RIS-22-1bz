@@ -18,8 +18,9 @@
 curl https://raw.githubusercontent.com/fire1ce/raspberry-pi-pir-motion-display-control/main/install.sh | bash
 ```
 
+Удаление скрипта:
 ```bash
-Удаление скрипта: curl https://raw.githubusercontent.com/fire1ce/raspberry-pi-pir-motion-display-control/main/uninstall.sh | bash
+curl https://raw.githubusercontent.com/fire1ce/raspberry-pi-pir-motion-display-control/main/uninstall.sh | bash
 ```
 
 Учебная версия 0.5.7 alfa <--- излишний выпендреж
