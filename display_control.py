@@ -75,4 +75,16 @@ while True:
         print("Good Looking Person Detected")
         camera.start_preview()
 
+GPIO.setwarnings(False) 
+GPIO.setmode(GPIO.BOARD) 
+GPIO.setup(4, GPIO.IN)         
+while True: 
+    i=GPIO.input(11) 
+    if i==0:                  
+        вывести "Движение не обнаружено", i 
+        time.sleep(0.1) 
+    elif i==1:               
+        вывести "Движение обнаружено", i 
+        time.sleep(0.1)
+
 motion = Motion(gpio_pin=4, display_delay=60, verbose=False)
