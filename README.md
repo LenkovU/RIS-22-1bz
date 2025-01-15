@@ -1,10 +1,8 @@
-РИС-22-1бз
+## РИС-22-1бз
 
+## Включение дисплея через срабатывание датчика движения
 
-Включение дисплея через срабатывание датчика движения
-
-
-Соавторы:
+### Соавторы:
 
 Леньков Юрий Игоревич
 
@@ -12,25 +10,26 @@
 
 Фамилия Владислав Отчетство
 
-
+## Описание
 При срабатывании датчика - дисплей загорается. При отсутствии движения более 1 минуты - дисплей потухает.
 
-
 Использован язык Python3
-Библиотека gpiozero
-Установка библиотеки: sudo apt install python3-gpiozero
 
+Библиотека: gpiozero
 
-Установка скрипта: 
+## Установка библиотеки
 ```bash
-curl https://github.com/LenkovU/RIS-22-1bz/blob/main/install.sh) | bash
+sudo apt install python3-gpiozero
 ```
 
-
-Удаление скрипта:
+### Установка скрипта: 
 ```bash
-curl https://github.com/LenkovU/RIS-22-1bz/blob/main/uninstall.sh | bash
+curl https://raw.githubusercontent.com/fire1ce/raspberry-pi-pir-motion-display-control/main/install.sh | bash
 ```
 
+### Удаление скрипта:
+```bash
+curl https://raw.githubusercontent.com/fire1ce/raspberry-pi-pir-motion-display-control/main/uninstall.sh | bash
+```
 
 Учебная версия 0.5.7 alfa <--- излишний выпендреж
