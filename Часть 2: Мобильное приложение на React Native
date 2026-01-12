@@ -1,0 +1,733 @@
+2.1 Структура проекта
+text
+raspberry-control-app/
+src/
+ screens/
+  HomeScreen.js
+  DevicesScreen.js
+  SettingsScreen.js
+ components/
+  DeviceCard.js
+  StatusIndicator.js
+  ControlButton.js
+ services/
+  api.js
+  config.js
+ App.js
+ package.json
+
+2.2 Основные файлы приложения
+App.js:
+
+javascript
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
+import HomeScreen from './src/screens/HomeScreen';
+import DevicesScreen from './src/screens/DevicesScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
+
+const Tab = createBottomTabNavigator();
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Tab.Navigator
+        screenOptions={({ route }) => ({
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName;
+            if (route.name === 'Главная') {
+              iconName = focused ? 'home' : 'home-outline';
+            } else if (route.name === 'Устройства') {
+              iconName = focused ? 'hardware-chip' : 'hardware-chip-outline';
+            } else if (route.name === 'Настройки') {
+              iconName = focused ? 'settings' : 'settings-outline';
+            }
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+          tabBarActiveTintColor: '#4CAF50',
+          tabBarInactiveTintColor: 'gray',
+        })}
+      >
+        <Tab.Screen name="Главная" component={HomeScreen} />
+        <Tab.Screen name="Устройства" component={DevicesScreen} />
+        <Tab.Screen name="Настройки" component={SettingsScreen} />
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+}
+src/config.js:
+
+javascript
+export const API_CONFIG = {
+  BASE_URL: 'http://192.168.1.100:5000', // Замените на IP вашего Raspberry Pi
+  ENDPOINTS: {
+    STATUS: '/api/status',
+    DEVICE: '/api/device',
+    ALL_ON: '/api/all/on',
+    ALL_OFF: '/api/all/off',
+    PIR_STATUS: '/api/pir/status',
+    RESTART: '/api/system/restart'
+  }
+};
+src/services/api.js:
+
+javascript
+import axios from 'axios';
+import { API_CONFIG } from '../config';
+
+const api = axios.create({
+  baseURL: API_CONFIG.BASE_URL,
+  timeout: 5000,
+  headers: {
+    'Content-Type': 'application/json',
+  }
+});
+
+export const raspberryAPI = {
+  // Получить статус всех устройств
+  getStatus: async () => {
+    try {
+      const response = await api.get(API_CONFIG.ENDPOINTS.STATUS);
+      return response.data;
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  },
+
+  // Управление устройством
+  controlDevice: async (deviceName, state) => {
+    try {
+      const response = await api.post(
+        `${API_CONFIG.ENDPOINTS.DEVICE}/${deviceName}`,
+        { state }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  },
+
+  // Включить все устройства
+  turnAllOn: async () => {
+    try {
+      const response = await api.post(API_CONFIG.ENDPOINTS.ALL_ON);
+      return response.data;
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  },
+
+  // Выключить все устройства
+  turnAllOff: async () => {
+    try {
+      const response = await api.post(API_CONFIG.ENDPOINTS.ALL_OFF);
+      return response.data;
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  },
+
+  // Получить статус датчика движения
+  getPIRStatus: async () => {
+    try {
+      const response = await api.get(API_CONFIG.ENDPOINTS.PIR_STATUS);
+      return response.data;
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  },
+
+  // Перезагрузить систему
+  restartSystem: async () => {
+    try {
+      const response = await api.post(API_CONFIG.ENDPOINTS.RESTART);
+      return response.data;
+    } catch (error) {
+      console.error('API Error:', error);
+      throw error;
+    }
+  }
+};
+src/components/DeviceCard.js:
+
+javascript
+import React from 'react';
+import { View, Text, StyleSheet, Switch, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+const DeviceCard = ({ 
+  title, 
+  icon, 
+  state, 
+  onToggle, 
+  description,
+  showSwitch = true 
+}) => {
+  const getIconColor = () => {
+    return state ? '#4CAF50' : '#757575';
+  };
+
+  const getStatusText = () => {
+    return state ? 'ВКЛ' : 'ВЫКЛ';
+  };
+
+  return (
+    <View style={styles.card}>
+      <View style={styles.header}>
+        <Ionicons name={icon} size={32} color={getIconColor()} />
+        <View style={styles.headerText}>
+          <Text style={styles.title}>{title}</Text>
+          {description && <Text style={styles.description}>{description}</Text>}
+        </View>
+      </View>
+      
+      <View style={styles.footer}>
+        <Text style={[styles.status, { color: state ? '#4CAF50' : '#f44336' }]}>
+          {getStatusText()}
+        </Text>
+        
+        {showSwitch && (
+          <Switch
+            value={state}
+            onValueChange={onToggle}
+            trackColor={{ false: '#767577', true: '#81b0ff' }}
+            thumbColor={state ? '#4CAF50' : '#f4f3f4'}
+          />
+        )}
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  headerText: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  description: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 2,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  status: {
+    fontSize: 16,
+    fontWeight: '500',
+  }
+});
+
+export default DeviceCard;
+src/screens/HomeScreen.js:
+
+javascript
+import React, { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+  Alert,
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { raspberryAPI } from '../services/api';
+import DeviceCard from '../components/DeviceCard';
+import ControlButton from '../components/ControlButton';
+
+const HomeScreen = () => {
+  const [status, setStatus] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const fetchStatus = async () => {
+    try {
+      setLoading(true);
+      const data = await raspberryAPI.getStatus();
+      setStatus(data.devices);
+    } catch (error) {
+      Alert.alert('Ошибка', 'Не удалось подключиться к Raspberry Pi');
+      console.error(error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const handleToggleDevice = async (device, newState) => {
+    try {
+      await raspberryAPI.controlDevice(device, newState);
+      fetchStatus();
+    } catch (error) {
+      Alert.alert('Ошибка', 'Не удалось изменить состояние устройства');
+    }
+  };
+
+  const handleAllOn = async () => {
+    try {
+      await raspberryAPI.turnAllOn();
+      fetchStatus();
+      Alert.alert('Успех', 'Все устройства включены');
+    } catch (error) {
+      Alert.alert('Ошибка', 'Не удалось включить устройства');
+    }
+  };
+
+  const handleAllOff = async () => {
+    try {
+      await raspberryAPI.turnAllOff();
+      fetchStatus();
+      Alert.alert('Успех', 'Все устройства выключены');
+    } catch (error) {
+      Alert.alert('Ошибка', 'Не удалось выключить устройства');
+    }
+  };
+
+  useEffect(() => {
+    fetchStatus();
+    
+    // Обновляем статус каждые 5 секунд
+    const interval = setInterval(fetchStatus, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchStatus();
+  };
+
+  if (loading && !status) {
+    return (
+      <View style={styles.centered}>
+        <Text>Загрузка...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView
+      style={styles.container}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
+      {/* Статус системы */}
+      <View style={styles.statusSection}>
+        <View style={styles.statusHeader}>
+          <Ionicons name="wifi" size={24} color={status?.system_status === 'online' ? '#4CAF50' : '#f44336'} />
+          <Text style={styles.sectionTitle}>
+            Статус системы: {status?.system_status === 'online' ? 'Онлайн' : 'Офлайн'}
+          </Text>
+        </View>
+        
+        {status?.temperature && (
+          <View style={styles.temperatureBox}>
+            <Ionicons name="thermometer" size={24} color="#FF5722" />
+            <Text style={styles.temperatureText}>
+              {status.temperature}°C
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Датчик движения */}
+      <DeviceCard
+        title="Датчик движения"
+        icon="walk"
+        state={status?.motion_detected}
+        description={status?.motion_detected ? "Обнаружено движение" : "Нет движения"}
+        showSwitch={false}
+      />
+
+      {/* Управление устройствами */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Управление устройствами</Text>
+        
+        <DeviceCard
+          title="Светодиод"
+          icon="bulb"
+          state={status?.led}
+          onToggle={(value) => handleToggleDevice('led', value)}
+          description="Встроенный светодиод"
+        />
+        
+        <DeviceCard
+          title="Реле"
+          icon="flash"
+          state={status?.relay}
+          onToggle={(value) => handleToggleDevice('relay', value)}
+          description="Релейный модуль"
+        />
+        
+        <DeviceCard
+          title="Зуммер"
+          icon="volume-high"
+          state={status?.buzzer}
+          onToggle={(value) => handleToggleDevice('buzzer', value)}
+          description="Звуковой сигнал"
+        />
+      </View>
+
+      {/* Групповое управление */}
+      <View style={styles.groupControls}>
+        <ControlButton
+          title="Включить все"
+          icon="power"
+          color="#4CAF50"
+          onPress={handleAllOn}
+          style={styles.controlButton}
+        />
+        
+        <ControlButton
+          title="Выключить все"
+          icon="power-off"
+          color="#f44336"
+          onPress={handleAllOff}
+          style={styles.controlButton}
+        />
+      </View>
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    padding: 16,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  statusSection: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+  },
+  statusHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  section: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginLeft: 8,
+    color: '#333',
+  },
+  temperatureBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFF3E0',
+    padding: 12,
+    borderRadius: 8,
+  },
+  temperatureText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#FF5722',
+    marginLeft: 8,
+  },
+  groupControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  controlButton: {
+    flex: 1,
+    marginHorizontal: 4,
+  },
+});
+
+export default HomeScreen;
+src/screens/SettingsScreen.js:
+
+javascript
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
+import { raspberryAPI } from '../services/api';
+import { API_CONFIG } from '../config';
+
+const SettingsScreen = () => {
+  const [ipAddress, setIpAddress] = useState(API_CONFIG.BASE_URL.replace('http://', ''));
+  const [loading, setLoading] = useState(false);
+
+  const saveSettings = async () => {
+    try {
+      await AsyncStorage.setItem('raspberry_ip', ipAddress);
+      Alert.alert('Успех', 'Настройки сохранены');
+    } catch (error) {
+      Alert.alert('Ошибка', 'Не удалось сохранить настройки');
+    }
+  };
+
+  const testConnection = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`http://${ipAddress}/api/status`, {
+        timeout: 3000,
+      });
+      if (response.ok) {
+        Alert.alert('Успех', 'Подключение установлено');
+      } else {
+        Alert.alert('Ошибка', 'Некорректный ответ от сервера');
+      }
+    } catch (error) {
+      Alert.alert('Ошибка', 'Не удалось подключиться к серверу');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRestart = () => {
+    Alert.alert(
+      'Перезагрузка',
+      'Вы уверены, что хотите перезагрузить систему?',
+      [
+        { text: 'Отмена', style: 'cancel' },
+        {
+          text: 'Перезагрузить',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await raspberryAPI.restartSystem();
+              Alert.alert('Успех', 'Команда перезагрузки отправлена');
+            } catch (error) {
+              Alert.alert('Ошибка', 'Не удалось отправить команду');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  return (
+    <ScrollView style={styles.container}>
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Настройки подключения</Text>
+        
+        <View style={styles.inputContainer}>
+          <Ionicons name="server" size={24} color="#666" style={styles.inputIcon} />
+          <TextInput
+            style={styles.input}
+            placeholder="IP адрес Raspberry Pi"
+            value={ipAddress}
+            onChangeText={setIpAddress}
+            keyboardType="url"
+            autoCapitalize="none"
+          />
+        </View>
+        
+        <View style={styles.buttonRow}>
+          <TouchableOpacity
+            style={[styles.button, styles.testButton]}
+            onPress={testConnection}
+            disabled={loading}
+          >
+            <Ionicons name="wifi" size={20} color="white" />
+            <Text style={styles.buttonText}>
+              {loading ? 'Проверка...' : 'Тест подключения'}
+            </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={[styles.button, styles.saveButton]}
+            onPress={saveSettings}
+          >
+            <Ionicons name="save" size={20} color="white" />
+            <Text style={styles.buttonText}>Сохранить</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Управление системой</Text>
+        
+        <TouchableOpacity
+          style={[styles.button, styles.restartButton]}
+          onPress={handleRestart}
+        >
+          <Ionicons name="refresh" size={24} color="white" />
+          <Text style={styles.buttonText}>Перезагрузить систему</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Информация</Text>
+        
+        <View style={styles.infoCard}>
+          <Ionicons name="information-circle" size={24} color="#2196F3" />
+          <View style={styles.infoContent}>
+            <Text style={styles.infoTitle}>Raspberry Pi Controller</Text>
+            <Text style={styles.infoText}>Версия 1.0.0</Text>
+            <Text style={styles.infoText}>Управление GPIO через REST API</Text>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+    padding: 16,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginBottom: 16,
+  },
+  inputIcon: {
+    marginRight: 8,
+  },
+  input: {
+    flex: 1,
+    height: 50,
+    fontSize: 16,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    flex: 1,
+    marginHorizontal: 4,
+  },
+  testButton: {
+    backgroundColor: '#2196F3',
+  },
+  saveButton: {
+    backgroundColor: '#4CAF50',
+  },
+  restartButton: {
+    backgroundColor: '#FF9800',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: '600',
+    marginLeft: 8,
+    fontSize: 16,
+  },
+  infoCard: {
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+  },
+  infoContent: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  infoTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  infoText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 2,
+  },
+});
+
+export default SettingsScreen;
+2.3 package.json для React Native
+json
+{
+  "name": "RaspberryControl",
+  "version": "1.0.0",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "expo": "~48.0.0",
+    "expo-status-bar": "~1.4.4",
+    "react": "18.2.0",
+    "react-native": "0.71.8",
+    "react-native-safe-area-context": "4.5.0",
+    "react-native-screens": "~3.20.0",
+    "@react-navigation/native": "^6.1.6",
+    "@react-navigation/bottom-tabs": "^6.5.7",
+    "@expo/vector-icons": "^13.0.0",
+    "axios": "^1.4.0",
+    "@react-native-async-storage/async-storage": "1.18.2",
+    "react-native-gesture-handler": "~2.9.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0"
+  },
+  "private": true
+}
