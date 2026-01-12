@@ -1,0 +1,4 @@
+3.1 На Raspberry Pi:
+bash
+# Установите Flask и зависимости
+sudo pip
