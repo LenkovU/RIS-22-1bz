@@ -1,0 +1,22 @@
+● app.py                    # Основной Flask сервер
+● requirements.txt          # Зависимости Python
+
+● templates/                # HTML шаблоны
+  - index.html              # Веб-интерфейс
+
+● static/                   # Статические файлы
+  - css/
+  - js/
+  - images/
+
+● scripts/                  # Вспомогательные скрипты
+  - gpio_init.sh            # Инициализация GPIO
+  - start_server.sh         # Скрипт запуска
+  - install_deps.sh         # Установка зависимостей
+
+● logs/                     # Логи приложения
+  - app.log
+  - error.log
+
+● systemd/                  # Конфигурация автозапуска
+  - raspberry-control.service
