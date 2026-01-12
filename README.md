@@ -10,26 +10,5 @@
 
 Якимов Владислав Игоревич - Тестировщик
 
-## Описание
-При срабатывании датчика - дисплей загорается. При отсутствии движения более 1 минуты - дисплей потухает.
-
-Использован язык Python3
-
-Библиотека: gpiozero
-
-### Установка библиотеки
-```bash
-sudo apt install python3-gpiozero
-```
-
-### Установка скрипта: 
-```bash
-curl https://github.com/LenkovU/RIS-22-1bz/blob/main/install.sh
-```
-
-### Удаление скрипта:
-```bash
-curl https://github.com/LenkovU/RIS-22-1bz/blob/main/uninstall.sh
-```
 
 
